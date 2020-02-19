@@ -10,8 +10,8 @@ import cv2
 import face_recognition
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("-o","--outpout", type=str,
-                    help='Arrêter Le Wabna Svp ')
+parser.add_argument("-o","--output", type=str,
+                    help='choice your output ')
 args = parser.parse_args()
 # Get a reference to webcam 
 video_capture = cv2.VideoCapture(0)
