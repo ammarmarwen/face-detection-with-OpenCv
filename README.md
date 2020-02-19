@@ -10,3 +10,8 @@ pip install dlib
 
 pip install face_recognition
 
+
+run code :
+
+python face_detect -o folder path 
+
