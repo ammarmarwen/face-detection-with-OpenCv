@@ -12,7 +12,7 @@ import face_recognition
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-o","--outpout", type=str,
-                    help='Facial-Expression-Recognition ')
+                    help='choice your output ')
 args = parser.parse_args()
 # Get a reference to webcam 
 video_capture = cv2.VideoCapture(0)
