@@ -1,1 +1,80 @@
 
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Fev 21 16:58:43 2019
+
+@author: marwen
+"""
+
+# import libraries
+import cv2
+import face_recognition
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-o","--outpout", type=str,
+                    help='Arrêter Le Wabna Svp ')
+args = parser.parse_args()
+# Get a reference to webcam 
+video_capture = cv2.VideoCapture(0)
+
+
+from keras.models import model_from_json
+model = model_from_json(open("facial_expression_model_structure.json", "r").read())
+model.load_weights('facial_expression_model_weights.h5') #load weights
+from keras.preprocessing import image
+import numpy as np 
+
+# Initialize variables
+emotions = ('angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral')
+
+face_locations = []
+count=0
+while True:
+    # Grab a single frame of video
+    ret, frame = video_capture.read()
+
+    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+    rgb_frame = frame[:, :, ::-1]
+
+    # Find all the faces in the current frame of video
+    face_locations = face_recognition.face_locations(rgb_frame)
+    
+    # Display the results
+    for x, y, w, h in face_locations:
+        # Draw a box around the face
+        cv2.rectangle(frame, (h, x), (y, w), (0, 0, 255), 2)#draw rectangle to main image
+        detected_face = frame[int(x):int(w), int(h):int(y)] #crop detected face
+        detected_face = cv2.cvtColor(detected_face, cv2.COLOR_BGR2GRAY) #transform to gray scale
+#crop detected face
+        detected_face = cv2.resize(detected_face, (48, 48)) #resize to 48x48
+        img_pixels = image.img_to_array(detected_face)
+        img_pixels = np.expand_dims(img_pixels, axis = 0)
+        img_pixels /= 255 #pixels are in scale of [0, 255]. normalize all pixels in scale of [0, 1]
+        predictions = model.predict(img_pixels)#store probabilities of 7 expressions
+        max_index = np.argmax(predictions[0])
+        emotion = emotions[max_index]
+        #write emotion text above rectangle
+        cv2.putText(frame, emotion, (int(h), int(x)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+
+
+
+        count += 1
+        # Save the captured image into the datasets folder
+        cv2.imwrite(str(args.outpout)
++ "/data" + '.' + str(count) + ".jpg", frame)
+    # Display the resulting image
+    cv2.imshow('Video', frame)
+
+
+    # Hit 'Echap' on the keyboard to quit!
+    k = cv2.waitKey(100) & 0xff # Press 'ESC' for exiting video
+    if k == 27:
+        break
+    
+
+# Release handle to the webcam
+video_capture.release()
+cv2.destroyAllWindows()
+
+
